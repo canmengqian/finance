@@ -52,6 +52,31 @@ const options = {
           ]
         },
         {
+          path: '网站信息',
+          name: '网站信息',
+          meta: {
+            icon: 'dashboard'
+          },
+          component: BlankView,
+          children: [
+            {
+              path: 'workplace',
+              name: '网站列表',
+              meta: {
+                page: {
+                  closable: false
+                }
+              },
+              component: () => import('@/pages/website/WebSiteList'),
+            },
+            {
+              path: 'analysis',
+              name: '分析页',
+              component: () => import('@/pages/dashboard/analysis'),
+            }
+          ]
+        },
+        {
           path: 'form',
           name: '表单页',
           meta: {
