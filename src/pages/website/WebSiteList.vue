@@ -25,15 +25,6 @@
               </a-select>
             </a-form-item>
           </a-col>
-          <a-col :md="8" :sm="24" >
-            <a-form-item
-              label="调用次数"
-              :labelCol="{span: 5}"
-              :wrapperCol="{span: 18, offset: 1}"
-            >
-              <a-input-number style="width: 100%" placeholder="请输入" />
-            </a-form-item>
-          </a-col>
         </a-row>
           <a-row v-if="advanced">
           <a-col :md="8" :sm="24" >
@@ -43,27 +34,6 @@
               :wrapperCol="{span: 18, offset: 1}"
             >
               <a-date-picker style="width: 100%" placeholder="请输入录入日期" />
-            </a-form-item>
-          </a-col>
-          <a-col :md="8" :sm="24" >
-            <a-form-item
-              label="使用状态"
-              :labelCol="{span: 5}"
-              :wrapperCol="{span: 18, offset: 1}"
-            >
-              <a-select placeholder="请选择">
-                <a-select-option value="1">关闭</a-select-option>
-                <a-select-option value="2">运行中</a-select-option>
-              </a-select>
-            </a-form-item>
-          </a-col>
-          <a-col :md="8" :sm="24" >
-            <a-form-item
-              label="描述"
-              :labelCol="{span: 5}"
-              :wrapperCol="{span: 18, offset: 1}"
-            >
-              <a-input placeholder="请输入" />
             </a-form-item>
           </a-col>
         </a-row>
@@ -79,8 +49,39 @@
       </a-form>
     </div>
     <div>
+      <a-button type="primary">
+        Primary
+      </a-button>
+      <a-button>Default</a-button>
+      <a-button type="dashed">
+        Dashed
+      </a-button>
+      <a-button type="danger">
+        Danger
+      </a-button>
+      <a-config-provider :auto-insert-space-in-button="false">
+        <a-button type="primary">
+          按钮
+        </a-button>
+      </a-config-provider>
+      <a-button type="primary">
+        按钮
+      </a-button>
+      <a-button type="link">
+        Link
+      </a-button>
+    </div>
+<!--对话框    -->
+    <div>
+      <a-modal v-model="visible" title="Basic Modal" @ok="handleOk" id="websiteAdd">
+
+      </a-modal>
+    </div>
+<!--  新增页面结束  -->
+    <div>
       <a-space class="operator">
         <a-button @click="addNew" type="primary">新建</a-button>
+        <a-button @click="showModal" type="primary">录入网站信息</a-button>
         <a-button >批量操作</a-button>
         <a-dropdown>
           <a-menu @click="handleMenuClick" slot="overlay">
@@ -104,7 +105,7 @@
           {{text}}
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a style="margin-right: 8px">
+          <a style="margin-right: 8px" @click="openlayer">
             <a-icon type="plus"/>新增
           </a>
           <a style="margin-right: 8px">
@@ -128,33 +129,48 @@
 
 <script>
 import StandardTable from '@/components/table/StandardTable'
+import {Button} from 'ant-design-vue'
+
+
 const columns = [
   {
-    title: '规则编号',
-    dataIndex: 'no'
+    title: '网站编码',
+    dataIndex: 'id',
+    colSpan:0 // 隐藏列
   },
   {
-    title: '描述',
-    dataIndex: 'description',
+    title: '网站名称',
+    dataIndex: 'name'
+  },
+  {
+    title: '网站链接',
+    dataIndex: 'webLink',
     scopedSlots: { customRender: 'description' }
   },
   {
-    title: '服务调用次数',
-    dataIndex: 'callNo',
+    title: '网站类型',
+    dataIndex: 'type',
     sorter: true,
     needTotal: true,
     customRender: (text) => text + ' 次'
   },
   {
+    title: '网站描述',
+    dataIndex: 'desc',
+    needTotal: false,
+    sorter: true,
+  },
+  {
+    title: '是否可用',
+    dataIndex: 'status',
+    needTotal: false,
+    sorter: true,
+  },
+  /*{
     dataIndex: 'status',
     needTotal: true,
     slots: {title: 'statusTitle'}
-  },
-  {
-    title: '更新时间',
-    dataIndex: 'updatedAt',
-    sorter: true
-  },
+  },*/
   {
     title: '操作',
     scopedSlots: { customRender: 'action' }
@@ -166,29 +182,55 @@ const dataSource = []
 for (let i = 0; i < 100; i++) {
   dataSource.push({
     key: i,
-    no: 'NO ' + i,
-    description: '这是一段描述',
-    callNo: Math.floor(Math.random() * 1000),
-    status: Math.floor(Math.random() * 10) % 4,
+    id: 'NO ' + i,
+    name:'网站'+i,
+    webLink: '链接',
+    type: '金融类',
+    desc: '描述'+i,
+    status:0,
     updatedAt: '2018-07-26'
   })
 }
 
 export default {
   name: 'QueryList',
-  components: {StandardTable},
+  // eslint-disable-next-line vue/no-unused-components
+  components: {StandardTable,Button},
   data () {
     return {
       advanced: true,
       columns: columns,
       dataSource: dataSource,
-      selectedRows: []
+      selectedRows: [],
+      visible: false,
     }
   },
   authorize: {
     deleteRecord: 'delete'
   },
   methods: {
+    showModal() {
+      this.visible = true;
+    },
+    handleOk(e) {
+      console.log(e);
+      this.visible = false;
+    },
+    openlayer() {
+      let self = this;
+      this.$confirm({
+        title: '确认提示',
+        content: `是否确认删除？`,
+        okButtonProps: {
+          color: this.themeColor,
+        },
+        onOk () {
+          //已选择的行，取id
+          self.selectedRows = self.selectedRows.map((item) => item.id);
+          self.deleteUser(self.selectedRows);
+        }
+      });
+    },
     deleteRecord(key) {
       this.dataSource = this.dataSource.filter(item => item.key !== key)
       this.selectedRows = this.selectedRows.filter(item => item.key !== key)
