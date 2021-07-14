@@ -50,7 +50,13 @@
     </div>
 <!--新增页面     -->
     <div>
-      <a-modal v-model="visibleAdd" title="新增网站信息" @ok="websiteAdd" id="websiteAdd">
+      <a-modal v-model="visibleAdd"
+               title="新增网站信息"
+               :id="websiteAdd"
+               :afterClose=addClose
+               :width="1000"
+               @ok="websiteAdd"
+      >
         <web-site-add-form>
         </web-site-add-form>
       </a-modal>
@@ -61,7 +67,11 @@
 -->
 
    <div>
-      <a-modal v-model="visibleUpd" title="修改网站信息" @ok="websiteUpd" id="websiteUpd">
+      <a-modal v-model="visibleUpd"
+               title="修改网站信息"
+               :width="1000"
+               :id="websiteUpd"
+               @ok="websiteUpd" >
        <WebSiteUpdForm></WebSiteUpdForm>
       </a-modal>
     </div>
@@ -94,17 +104,20 @@
         :columns="columns"
         :dataSource="dataSource"
         :selectedRows.sync="selectedRows"
+        :loading= queryLoading
+        :pagination= pagination
         @clear="onClear"
-        @change="onChange"
+
         @selectedRowChange="onSelectChange"
       >
+<!--     @change="onChange"   -->
         <div slot="description" slot-scope="{text}">
           {{text}}
         </div>
         <div slot="action" slot-scope="{text, record}">
-          <a style="margin-right: 8px" @click="openlayer">
+<!--          <a style="margin-right: 8px" @click="openlayer">
             <a-icon type="plus"/>新增
-          </a>
+          </a>-->
           <a style="margin-right: 8px" @click="openUpdModal(text,record)">
             <a-icon type="edit" />编辑
           </a>
@@ -174,20 +187,8 @@ const columns = [
   }
 ]
 
-const dataSource = []
 
-for (let i = 0; i < 100; i++) {
-  dataSource.push({
-    key: i,
-    id: 'NO ' + i,
-    name:'网站'+i,
-    webLink: '链接',
-    type: '金融类',
-    desc: '描述'+i,
-    status:0,
-    updatedAt: '2018-07-26'
-  })
-}
+
 import WebSiteAddForm from '@/pages/website/WebSiteAddForm';
 import WebSiteUpdForm from "@/pages/website/WebSiteUpdForm";
 import reqwest from 'reqwest'
@@ -197,20 +198,72 @@ export default {
   components: {StandardTable,Button,WebSiteAddForm,WebSiteUpdForm},
   data () {
     return {
+      queryLoading: true,
       fileList: [],
       uploading: false,
       advanced: true,
       columns: columns,
-      dataSource: dataSource,
+      dataSource: [],
       selectedRows: [],
       visibleAdd: false,
       visibleUpd: false,
+      pagination: {
+        total:0,
+        defaultPageSize:20,
+        pageSizeOptions: ['1','10', '20', '30', '40'],
+        showSizeChanger:true,
+        showTotal: total => '总共'+total+'条',
+        /*点击下一页进行分页查询*/
+        onChange: (current, size) => {
+          debugger
+          console.log(current)
+          this.pagination.defaultCurrent = current;
+          this.pagination.defaultPageSize = size;
+        },
+        onShowSizeChange: (current, pageSize) => {
+          this.pagination.defaultCurrent = 1;
+          this.pagination.defaultPageSize = pageSize;
+        }
+      }
     }
+  },
+  created() {
+    debugger
+    this.initQuery();
+    this.queryLoading = false
+    this.pagination.total =1000
+  },
+  init() {
+    debugger
+    // TOOD 不起作用
+    console.log("init");
   },
   authorize: {
     deleteRecord: 'delete'
   },
   methods: {
+    addClose() {
+      debugger
+      console.log()
+    },
+    pageQuery(page) {
+      debugger
+      console.log(page)
+    },
+    initQuery() {
+      for (let i = 0; i < 100; i++) {
+        this.dataSource.push({
+          key: i,
+          id: 'NO ' + i,
+          name:'网站'+i,
+          webLink: '链接',
+          type: '金融类',
+          desc: '描述'+i,
+          status:0,
+          updatedAt: '2018-07-26'
+        })
+      }
+    },
     /*移除文件*/
     handleRemove(file) {
       const index = this.fileList.indexOf(file);
@@ -306,7 +359,9 @@ export default {
     onStatusTitleClick() {
       this.$message.info('你点击了状态栏表头')
     },
-    onChange() {
+    onChange(page,pageSize) {
+      debugger
+      console.log(page+''+pageSize)
       this.$message.info('表格状态改变了')
     },
     onSelectChange() {
