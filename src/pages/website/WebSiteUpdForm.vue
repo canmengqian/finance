@@ -2,7 +2,7 @@
   <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }" @submit="handleSubmit">
     <a-form-item label="网站名称">
       <a-input
-          v-decorator="['note', { rules: [{ required: true, message: '请输入网站名称!' }] }]"
+          v-decorator="['name', { rules: [{ required: true, message: '网站名称' }] }]"
       />
     </a-form-item>
     <a-form-item label="Gender">

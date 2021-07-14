@@ -1,2 +1,3 @@
 import WebSiteAddForm from './WebSiteAddForm'
-export default WebSiteAddForm
+import WebSiteUpdForm from "@/pages/website/WebSiteUpdForm";
+export default {WebSiteAddForm,WebSiteUpdForm}

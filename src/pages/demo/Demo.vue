@@ -39,7 +39,7 @@
         </a-row>
         </div>
         <span style="float: right; margin-top: 3px;">
-          <a-button type="primary" @click="query">查询</a-button>
+          <a-button type="primary">查询</a-button>
           <a-button style="margin-left: 8px">重置</a-button>
           <a @click="toggleAdvanced" style="margin-left: 8px">
             {{advanced ? '收起' : '展开'}}
@@ -48,30 +48,42 @@
         </span>
       </a-form>
     </div>
-<!--新增页面     -->
     <div>
-      <a-modal v-model="visibleAdd" title="新增网站信息" @ok="websiteAdd" id="websiteAdd">
-        <web-site-add-form>
-        </web-site-add-form>
+      <a-button type="primary">
+        Primary
+      </a-button>
+      <a-button>Default</a-button>
+      <a-button type="dashed">
+        Dashed
+      </a-button>
+      <a-button type="danger">
+        Danger
+      </a-button>
+      <a-config-provider :auto-insert-space-in-button="false">
+        <a-button type="primary">
+          按钮
+        </a-button>
+      </a-config-provider>
+      <a-button type="primary">
+        按钮
+      </a-button>
+      <a-button type="link">
+        Link
+      </a-button>
+    </div>
+<!--对话框    -->
+    <div>
+      <a-modal v-model="visible" title="Basic Modal" @ok="handleOk" id="websiteAdd">
+
       </a-modal>
     </div>
 <!--  新增页面结束  -->
-<!--
-修改页面
--->
-
-   <div>
-      <a-modal v-model="visibleUpd" title="修改网站信息" @ok="websiteUpd" id="websiteUpd">
-       <WebSiteUpdForm></WebSiteUpdForm>
-      </a-modal>
-    </div>
-<!--  操作  -->
     <div>
       <a-space class="operator">
-<!--        <a-button @click="addNew" type="primary">新建</a-button>-->
+        <a-button @click="addNew" type="primary">新建</a-button>
         <a-button @click="showModal" type="primary">录入网站信息</a-button>
-        <a-button >批量删除</a-button>
-<!--        <a-dropdown>
+        <a-button >批量操作</a-button>
+        <a-dropdown>
           <a-menu @click="handleMenuClick" slot="overlay">
             <a-menu-item key="delete">删除</a-menu-item>
             <a-menu-item key="audit">审批</a-menu-item>
@@ -79,16 +91,7 @@
           <a-button>
             更多操作 <a-icon type="down" />
           </a-button>
-        </a-dropdown>-->
-      <!--文件上传 -->
-        <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload">
-          <a-button> <a-icon type="upload" /> Select File </a-button>
-        </a-upload>
-        <a-button  type="primary" :disabled="fileList.length === 0" :loading="uploading" style="margin-top: 0px"
-            @click="handleUpload"
-        >
-          {{ uploading ? 'Uploading' : 'Start Upload' }}
-        </a-button>
+        </a-dropdown>
       </a-space>
       <standard-table
         :columns="columns"
@@ -105,8 +108,8 @@
           <a style="margin-right: 8px" @click="openlayer">
             <a-icon type="plus"/>新增
           </a>
-          <a style="margin-right: 8px" @click="openUpdModal(text,record)">
-            <a-icon type="edit" />编辑
+          <a style="margin-right: 8px">
+            <a-icon type="edit"/>编辑
           </a>
           <a @click="deleteRecord(record.key)">
             <a-icon type="delete" />删除1
@@ -148,7 +151,7 @@ const columns = [
     title: '网站类型',
     dataIndex: 'type',
     sorter: true,
-    needTotal: false,
+    needTotal: true,
     customRender: (text) => text + ' 次'
   },
   {
@@ -188,93 +191,32 @@ for (let i = 0; i < 100; i++) {
     updatedAt: '2018-07-26'
   })
 }
-import WebSiteAddForm from '@/pages/website/WebSiteAddForm';
-import WebSiteUpdForm from "@/pages/website/WebSiteUpdForm";
-import reqwest from 'reqwest'
+
 export default {
   name: 'QueryList',
   // eslint-disable-next-line vue/no-unused-components
-  components: {StandardTable,Button,WebSiteAddForm,WebSiteUpdForm},
+  components: {StandardTable,Button},
   data () {
     return {
-      fileList: [],
-      uploading: false,
       advanced: true,
       columns: columns,
       dataSource: dataSource,
       selectedRows: [],
-      visibleAdd: false,
-      visibleUpd: false,
+      visible: false,
     }
   },
   authorize: {
     deleteRecord: 'delete'
   },
   methods: {
-    /*移除文件*/
-    handleRemove(file) {
-      const index = this.fileList.indexOf(file);
-      const newFileList = this.fileList.slice();
-      newFileList.splice(index, 1);
-      this.fileList = newFileList;
-    },
-    /*上传前处理*/
-    beforeUpload(file) {
-      this.fileList = [...this.fileList, file];
-      return false;
-    },
-    /*上传文件*/
-    handleUpload() {
-      const { fileList } = this;
-      const formData = new FormData();
-      fileList.forEach(file => {
-        formData.append('files[]', file);
-      });
-      this.uploading = true;
-
-      // You can use any AJAX library you like
-      reqwest({
-        url: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-        method: 'post',
-        processData: false,
-        data: formData,
-        success: () => {
-          this.fileList = [];
-          this.uploading = false;
-          this.$message.success('upload successfully.');
-        },
-        error: () => {
-          this.uploading = false;
-          this.$message.error('upload failed.');
-        },
-      });
-    },
     showModal() {
-      // eslint-disable-next-line no-debugger
-      debugger
-      this.visibleAdd = true;
+      this.visible = true;
     },
-    websiteAdd(e) {
-      // eslint-disable-next-line no-debugger
-      debugger
+    handleOk(e) {
       console.log(e);
-      this.visibleAdd = false;
-    },
-    websiteUpd(e) {
-      console.log(e);
-      this.visibleUpd = false;
-    },
-    openUpdModal(text,record) {
-      // eslint-disable-next-line no-debugger
-      debugger
-      this.visibleUpd = true
-      // eslint-disable-next-line no-unused-vars
-      var name = self.selectedRows;
-      console.log(record)
+      this.visible = false;
     },
     openlayer() {
-      // eslint-disable-next-line no-debugger
-      debugger
       let self = this;
       this.$confirm({
         title: '确认提示',
